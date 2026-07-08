@@ -1,0 +1,38 @@
+[
+  {
+    "id": "loc1",
+    "name": "Forest Gate",
+    "description": "A quiet place at the beginning of the forest route.",
+    "routePosition": "Start of the trail",
+    "drinkOffer": [
+      "Water",
+      "Cola",
+      "Beer",
+      "Apple Juice"
+    ]
+  },
+  {
+    "id": "loc2",
+    "name": "Lake Stop",
+    "description": "Rest area near the lake.",
+    "routePosition": "Middle of the trail",
+    "drinkOffer": [
+      "Water",
+      "Cider",
+      "Lemonade",
+      "Energy Drink"
+    ]
+  },
+  {
+    "id": "loc3",
+    "name": "Hill Point",
+    "description": "Top of the hill with a nice view.",
+    "routePosition": "End of the trail",
+    "drinkOffer": [
+      "Water",
+      "Energy Drink",
+      "Wine",
+      "Raspberry Soda"
+    ]
+  }
+]

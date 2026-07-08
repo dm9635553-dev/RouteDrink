@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RouteDrink</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; }
+    .page { max-width:1100px; margin:30px auto; background:white; padding:35px; border:2px solid #222; }
+    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; }
+    h1 { margin:0; font-size:36px; }
+    h2 { text-align:right; }
+    .card { border:1px solid #222; padding:20px; margin:18px 0; }
+    .location-card { display:flex; justify-content:space-between; align-items:center; }
+    button { padding:10px 25px; cursor:pointer; background:white; border:1px solid #222; font-size:16px; }
+    button.primary { background:black; color:white; }
+    input { width:100%; padding:12px; margin:8px 0 20px; font-size:16px; }
+    .drink-row { display:flex; justify-content:space-between; align-items:center; }
+    .success { text-align:center; font-weight:bold; margin:30px; }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <h1>RouteDrink</h1>
+      <nav>
+  <u onclick="showDashboard()" style="cursor:pointer;">Dashboard</u>
+  &nbsp;&nbsp;
+  <u onclick="showOrders()" style="cursor:pointer;">Orders</u>
+</nav>
+    </header>
+
+    <main id="app"></main>
+  </div>
+
+<script>
+const app = document.getElementById("app");
+
+let locations = [
+  {
+    id: "loc1",
+    name: "Forest Gate",
+    description: "A quiet place at the beginning of the forest route.",
+    position: "Start of the trail",
+    drinks: ["Water", "Coffee", "Tea", "Juice"]
+  },
+  {
+    id: "loc2",
+    name: "Lake Stop",
+    description: "Near the lake, rest area.",
+    position: "Middle of the route",
+    drinks: ["Lemonade", "Water", "Tea", "Coffee"]
+  },
+  {
+    id: "loc3",
+    name: "Hill Point",
+    description: "Top of the hill.",
+    position: "Highest point of the trail",
+    drinks: ["Coffee", "Energy drink", "Water", "Tea"]
+  },
+  {
+    id: "loc4",
+    name: "Camp Base",
+    description: "Final stop on the route.",
+    position: "End of the route",
+    drinks: ["Juice", "Water", "Tea", "Coffee"]
+  }
+];
+
+let selectedLocation = null;
+let selectedDrink = null;
+let createdOrder = null;
+
+async function showDashboard() {
+  app.innerHTML = `
+    <h2 style="text-align:left;">Available Locations</h2>
+    ${locations.map(location => `
+      <div class="card location-card">
+        <div>
+          <h3>📍 ${location.name}</h3>
+          <p>${location.description}</p>
+          <p><b>Drinks:</b> ${location.drinks.join(", ")}</p>
+        </div>
+        <button onclick="showLocationDetail('${location.id}')">View Detail</button>
+      </div>
+    `).join("")}
+  `;
+}
+
+function showLocationDetail(id) {
+  selectedLocation = locations.find(l => l.id === id);
+
+  app.innerHTML = `
+    <button onclick="showDashboard()">← Back to Dashboard</button>
+    <h2>Location Detail</h2>
+
+    <h1>📍 ${selectedLocation.name}</h1>
+
+    <div class="card">
+      <p><b>Description:</b> ${selectedLocation.description}</p>
+      <p><b>Position on route:</b> ${selectedLocation.position}</p>
+    </div>
+
+    <h2 style="text-align:left;">Available Drinks</h2>
+
+    ${selectedLocation.drinks.map(drink => `
+      <div class="card drink-row">
+        <span>🥤 ${drink}</span>
+        <button onclick="showCreateOrder('${drink}')">Select</button>
+      </div>
+    `).join("")}
+  `;
+}
+
+function showCreateOrder(drink) {
+  selectedDrink = drink;
+
+  app.innerHTML = `
+    <button onclick="showLocationDetail('${selectedLocation.id}')">← Back to Dashboard</button>
+    <h2>Create Order</h2>
+
+    <h1>📍 ${selectedLocation.name}</h1>
+    <p>Selected Drink:</p>
+    <h2 style="text-align:left;">${selectedDrink}</h2>
+
+    <div class="card">
+      <label><b>Customer Name:</b></label>
+      <input id="customerName" />
+
+      <label><b>Pickup Date:</b></label>
+<input id="pickupDate" type="date" min="${new Date().toISOString().split('T')[0]}" />
+
+<label><b>Pickup Time:</b></label>
+<input id="pickupTime" type="time" />
+
+      <label><b>Note:</b></label>
+      <input id="note" />
+
+      <p style="text-align:center;">
+        <button class="primary" onclick="createOrder()">Create Order</button>
+      </p>
+    </div>
+
+    <button style="width:100%;" onclick="showLocationDetail('${selectedLocation.id}')">Cancel / Back</button>
+  `;
+}
+
+function createOrder() {
+  const pickupDate = document.getElementById("pickupDate").value;
+  const pickupTime = document.getElementById("pickupTime").value;
+
+  if (!pickupDate) {
+    alert("Please select a pickup date.");
+    return;
+  }
+
+  if (!pickupTime) {
+    alert("Please select a pickup time.");
+    return;
+  }
+
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const currentTime = now.toTimeString().slice(0, 5);
+
+  if (pickupDate < today) {
+    alert("Pickup date cannot be in the past.");
+    return;
+  }
+
+  if (pickupDate === today && pickupTime < currentTime) {
+    alert("Pickup time cannot be in the past.");
+    return;
+  }
+
+  const order = {
+    id: "ord" + Date.now(),
+    customerName: document.getElementById("customerName").value || "Darya",
+    drink: selectedDrink,
+    locationId: selectedLocation.id,
+    pickupDate: pickupDate,
+    pickupTime: pickupTime,
+    note: document.getElementById("note").value || "No sugar"
+  };
+
+  fetch("/order/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(order)
+  })
+    .then(response => response.json())
+    .then(data => {
+      createdOrder = data;
+      createdOrder.location = selectedLocation.name;
+      showOrderDetail();
+    });
+}
+
+function showOrderDetail() {
+  app.innerHTML = `
+    <h2>Order Detail</h2>
+
+    <p>📍 Location:</p>
+    <h1>${createdOrder.location}</h1>
+
+    <p>🥤 Drink:</p>
+    <h1>${createdOrder.drink}</h1>
+
+    <div class="card">
+  <p><b>Customer Name:</b> ${createdOrder.customerName}</p>
+  <p><b>Pickup Date:</b> ${createdOrder.pickupDate}</p>
+  <p><b>Pickup Time:</b> ${createdOrder.pickupTime}</p>
+  <p><b>Note:</b> ${createdOrder.note}</p>
+</div>
+
+    <div class="success">✅ Order successfully created</div>
+
+    <button style="width:100%;" onclick="showDashboard()">Back to Dashboard</button>
+      `;
+     
+    }
+
+ 
+async function showOrders() {
+  const response = await fetch("/order/list");
+  const data = await response.json();
+  const orders = data.itemList;
+
+  app.innerHTML = `
+    <button onclick="showDashboard()">← Back to Dashboard</button>
+
+    <h2>Created Orders</h2>
+
+    ${orders.map(order => `
+      <div class="card">
+        <p><b>Order ID:</b> ${order.id}</p>
+        <p><b>Customer:</b> ${order.customerName}</p>
+        <p><b>Location ID:</b> ${order.locationId}</p>
+        <p><b>Drink:</b> ${order.drink}</p>
+<p><b>Pickup Date:</b> ${order.pickupDate || "-"}</p>
+<p><b>Pickup Time:</b> ${order.pickupTime}</p>
+<p><b>Note:</b> ${order.note || "-"}</p>
+<button onclick="deleteOrder('${order.id}')">Delete</button>
+      </div>
+    `).join("")}
+  `;
+} 
+function deleteOrder(id) {
+  fetch("/order/delete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id: id })
+  })
+    .then(response => response.json())
+    .then(() => {
+      showOrders();
+    });
+}
+
+showDashboard();
+</script>
+</body>
+</html>

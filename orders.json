@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ord1783540188099",
+    "customerName": "Pepa",
+    "drink": "Coffee",
+    "locationId": "loc1",
+    "pickupDate": "2026-07-08",
+    "pickupTime": "10:20",
+    "note": "No sugar"
+  },
+  {
+    "id": "ord1783540888710",
+    "customerName": "Hanna",
+    "drink": "Coffee",
+    "locationId": "loc1",
+    "pickupDate": "2026-07-08",
+    "pickupTime": {},
+    "note": "No sugar"
+  },
+  {
+    "id": "ord1783541902073",
+    "customerName": "Pepe",
+    "drink": "Water",
+    "locationId": "loc1",
+    "pickupDate": "2026-07-09",
+    "pickupTime": "10:20",
+    "note": "No sugar"
+  }
+]
